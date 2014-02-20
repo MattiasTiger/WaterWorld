@@ -1,91 +1,66 @@
+////////////////////////////////////////////////////////////
+// Headers
+////////////////////////////////////////////////////////////
+#include <SFML/Window.hpp>
+#include <SFML/OpenGL.hpp>
+#include "OpenglWrapper/OpenGL.hpp"
 
-//
-// Disclamer:
-// ----------
-//
-// This code will work only if you selected window, graphics and audio.
-//
-// Note that the "Run Script" build phase will copy the required frameworks
-// or dylibs to your application bundle so you can execute it on any OS X
-// computer.
-//
-// Your resource files (images, sounds, fonts, ...) are also copied to your
-// application bundle. To get the path to these resource, use the helper
-// method resourcePath() from ResourcePath.hpp
-//
+#include "./Scenes/TestScene.hpp"
 
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
+#include <iostream>
 
-// Here is a small helper for you ! Have a look.
-#include "ResourcePath.hpp"
-
-int main(int, char const**)
+int main()
 {
+    // Request a 32-bits depth buffer when creating the window, together with a specific opengl version
+    sf::ContextSettings contextSettings;
+    contextSettings.depthBits = 32;
+    contextSettings.majorVersion = 4;
+    contextSettings.minorVersion = 0;
+
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
+    sf::Window window(sf::VideoMode(640, 480), "SFML window with OpenGL", sf::Style::Default, contextSettings);
 
-    // Set the Icon
-    sf::Image icon;
-    if (!icon.loadFromFile(resourcePath() + "icon.png")) {
-        return EXIT_FAILURE;
-    }
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+    std::cout << "OpenGL version: " << window.getSettings().majorVersion << "." << window.getSettings().minorVersion << "\n";
 
-    // Load a sprite to display
-    sf::Texture texture;
-    if (!texture.loadFromFile(resourcePath() + "cute_image.jpg")) {
-        return EXIT_FAILURE;
-    }
-    sf::Sprite sprite(texture);
+    // Make it the active window for OpenGL calls
+    window.setActive();
 
-    // Create a graphical text to display
-    sf::Font font;
-    if (!font.loadFromFile(resourcePath() + "sansation.ttf")) {
-        return EXIT_FAILURE;
-    }
-    sf::Text text("Hello SFML", font, 50);
-    text.setColor(sf::Color::Black);
+    TestScene testScene;
+    testScene.setWindow(window);
+    testScene.reset();
 
-    // Load a music to play
-    sf::Music music;
-    if (!music.openFromFile(resourcePath() + "nice_music.ogg")) {
-        return EXIT_FAILURE;
-    }
+    // load resources, initialize the OpenGL states, ...
 
-    // Play the music
-    music.play();
-
-    // Start the game loop
-    while (window.isOpen())
+    bool running = true;
+    while (running)
     {
-        // Process events
+        // handle events
         sf::Event event;
         while (window.pollEvent(event))
         {
-            // Close window : exit
-            if (event.type == sf::Event::Closed) {
-                window.close();
+            if (event.type == sf::Event::Closed)
+            {
+                running = false;
             }
-
-            // Espace pressed : exit
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                window.close();
+            else if (event.type == sf::Event::Resized)
+            {
+                // adjust the viewport when the window is resized
+                glViewport(0, 0, event.size.width, event.size.height);
             }
         }
+        testScene.update(0.0);
 
-        // Clear screen
-        window.clear();
+        // clear the buffers
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw the sprite
-        window.draw(sprite);
+        testScene.render();
 
-        // Draw the string
-        window.draw(text);
+        // draw...
 
-        // Update the window
+        // end the current frame (internally swaps the front and back buffers)
         window.display();
     }
-    
-    return EXIT_SUCCESS;
-}
+
+    // release resources...
+    return 0;
+ }
