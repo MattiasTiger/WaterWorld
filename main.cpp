@@ -3,7 +3,9 @@
 ////////////////////////////////////////////////////////////
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
-#include <QOpenGLFunctions_4_0_Core>
+#include "OpenglWrapper/OpenGL.hpp"
+
+#include "Scenes/TestScene.hpp"
 
 #include <iostream>
 
@@ -22,6 +24,10 @@ int main()
 
     // Make it the active window for OpenGL calls
     window.setActive();
+
+    TestScene testScene;
+    testScene.setWindow(window);
+    testScene.reset();
 
     // load resources, initialize the OpenGL states, ...
 
@@ -42,9 +48,12 @@ int main()
                 glViewport(0, 0, event.size.width, event.size.height);
             }
         }
+        testScene.update(0.0);
 
         // clear the buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        testScene.render();
 
         // draw...
 
