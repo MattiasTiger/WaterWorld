@@ -9,6 +9,7 @@ class Model
 {
 public:
     Model() {}
+    Model(Model & other);
 
     void loadFromFile(std::string path);
     void loadFromString(std::string objText);
