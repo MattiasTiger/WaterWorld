@@ -6,7 +6,7 @@
 #elif _WIN64
     #include <QOpenGLFunctions_4_0_Core>
 #elif __APPLE__
-#include <OpenGL/OpenGL.h>
+    #include <OpenGL/OpenGL.h>
 #endif
 
 #include "VertexArrayObject.hpp"
